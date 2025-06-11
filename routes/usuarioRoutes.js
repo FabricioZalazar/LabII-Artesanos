@@ -1,7 +1,9 @@
 import express from 'express';
-import { verUsuarios } from "../controladores/usuarioControlador.js";
+import { usuarioControlador } from "../controladores/usuarioControlador.js";
 const router = express.Router();
 
-router.get('/usuarios',verUsuarios);
+router.get('/usuarios',usuarioControlador.verUsuarios);
+router.post('/usuarios/buscarXId',usuarioControlador.buscarUsuarioXId);
+router.post('/usuarios/buscarXNombre',usuarioControlador.buscarUsuariosXNombre);
 
 export default router;

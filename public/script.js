@@ -1,15 +1,50 @@
 
-async function init() {
+async function buscarPorId() {
+    const id = document.getElementById('inputId').value;
     try {
-        const response = await fetch('/usuarios');
+        const response = await fetch('/usuarios/buscarXId', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id })
+        });
+
         if (!response.ok) {
-            throw new Error(`¡Error HTTP! estado: ${response.status}`);
+            const errorMsg = await response.text();
+            console.log(errorMsg)
+        } else {
+            const data = await response.json();
+            console.log(data)
         }
-        const data = await response.json(); // Asumiendo que la respuesta es JSON
-        console.log(data);
-        return data;
+
     } catch (error) {
-        console.error('Error al obtener datos:', error);
-        throw error; // Vuelve a lanzar el error para un manejo posterior si es necesario
+        console.error('Error:', error);
+    }
+}
+
+async function buscarPorNombre() {
+    const nombre = document.getElementById('inputNombre').value;
+    try {
+        const response = await fetch('/usuarios/buscarXNombre', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre })
+        });
+
+        if (!response.ok) {
+            const errorMsg = await response.text();
+            console.log(errorMsg)
+        } else {
+            const data = await response.json();
+            data.forEach(usuario => {
+                 console.log(usuario.nombre);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
     }
 }

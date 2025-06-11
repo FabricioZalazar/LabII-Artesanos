@@ -10,8 +10,9 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'vistas')));
+app.use(usuarioRoutes);
 
-app.use("/",usuarioRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
