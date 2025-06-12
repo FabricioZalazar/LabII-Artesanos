@@ -1,9 +1,15 @@
 import express from 'express';
-import { usuarioControlador } from "../controladores/usuarioControlador.js";
 const router = express.Router();
+import {usuarioController} from '../controladores/usuarioControlador.js';
 
-router.get('/usuarios',usuarioControlador.verUsuarios);
-router.post('/usuarios/buscarXId',usuarioControlador.buscarUsuarioXId);
-router.post('/usuarios/buscarXNombre',usuarioControlador.buscarUsuariosXNombre);
+function verificarLogin(req, res, next) {
+  if (!req.session.usuario) return res.redirect('/login');
+  next();
+}
+
+router.post('/registro', usuarioController.registrar);
+router.post('/login', usuarioController.login);
+router.get('/logout', usuarioController.logout);
+router.get('/perfil', verificarLogin, usuarioController.mostrarPerfil);
 
 export default router;

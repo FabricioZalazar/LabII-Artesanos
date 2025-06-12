@@ -14,7 +14,7 @@ const connection = mysql.createConnection({
   user: 'root',
   password: '',
   database: 'fabriciozalazar_bd_artesanos_labii'
-});
+}).promise();
 
 connection.connect(function (error) {
     if (error) {

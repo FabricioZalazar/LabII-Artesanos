@@ -1,46 +1,58 @@
-import { usuarioModelo } from "../modelos/usuarioModelo.js";
+import  Usuario  from "../modelos/usuarioModelo.js";
+import bcrypt from 'bcryptjs';
 
- function verUsuarios(req,res){
-    usuarioModelo.getTodosLosUsuarios((err,usuarios)=>{
-        if(err){
-            return res.status(500).send('Error al Obtener Usuarios')
-        }else{
-            res.json(usuarios);
-        }
-    })
-}
 
-function buscarUsuarioXId(req,res){
-    const id = req.body.id;
-    usuarioModelo.getUsuarioXId(id,(err,usuario)=>{
-            if(err || usuario == null){
-            return res.status(500).send('Error al Obtener Usuario ID: '+id)
-        }else{
-            res.json(usuario);
-        }
-    })
+const registrar = async (req, res) => {
+  const { nombre, apellido, email, password } = req.body;
+
+  const existente = await Usuario.buscarPorEmail(email);
+  if (existente) return res.status(400).send('Ya existe un usuario con ese email');
+
+  const contraseñaHash = await bcrypt.hash(password, 10);
+
+  const nuevoUsuario = {
+    nombre,
+    apellido,
+    email,
+    contraseña: contraseñaHash
+  };
+
+  await Usuario.crear(nuevoUsuario);
+  res.redirect('/login');
 };
 
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  const usuario = await Usuario.buscarPorEmail(email);
 
-export function buscarUsuariosXNombre(req, res) {
-  const nombre = req.body.nombre;
+  if (!usuario) return res.status(401).send('Email incorrecto');
+  const esValido = await bcrypt.compare(password, usuario.contraseña);
+  if (!esValido) return res.status(401).send('Contraseña incorrecta');
 
-  if (!nombre) {
-    return res.status(400).send('Debe enviar un nombre para buscar');
-  }
-  usuarioModelo.getUsuariosXNombre(nombre, (err, usuarios) => {
-    if (err) {
-      return res.status(500).send('Error al buscar usuarios');
-    }
-    if (usuarios==null || usuarios.length == 0) {
-      return res.status(404).send('No se encontraron usuarios');
-    }
-    res.json(usuarios);
+  req.session.usuario = {
+    id: usuario.idUsuario,
+    nombre: usuario.nombre,
+    apellido: usuario.apellido
+  };
+
+  res.redirect('/perfil');
+};
+
+const logout = (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
   });
-}
+};
 
-export const usuarioControlador={
-    verUsuarios,
-    buscarUsuarioXId,
-    buscarUsuariosXNombre
+const mostrarPerfil = async (req, res) => {
+  const id = req.session.usuario.id;
+  const usuario = await Usuario.buscarPorId(id);
+  res.render('perfil', { usuario });
+};
+
+export const usuarioController = {
+  registrar,
+  login,
+  logout,
+  mostrarPerfil
 };
